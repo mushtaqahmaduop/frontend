@@ -90,13 +90,15 @@ async function checkLogin() {
     CUR_USER = WARDENS[CUR_ROLE];
 
     // Mark session as authenticated
-    sessionStorage.setItem('h_auth', '1');
-    sessionStorage.setItem('h_role', CUR_ROLE);
+ // In checkLogin(), after sessionStorage.setItem('h_auth', '1'):
+sessionStorage.setItem('h_auth', '1');
+sessionStorage.setItem('h_role', CUR_ROLE);
 
-    document.getElementById('login-screen').style.display = 'none';
-    updateRoleBadge();
+await loadDB();  // ← ADD THIS LINE
 
-    if (typeof showSplashScreen === 'function') showSplashScreen();
+document.getElementById('login-screen').style.display = 'none';
+updateRoleBadge();
+if (typeof showSplashScreen === 'function') showSplashScreen();
 
   } catch (err) {
     // Show wrong-password error
