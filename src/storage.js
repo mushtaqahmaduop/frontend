@@ -19,17 +19,19 @@ const SAVE_DEBOUNCE_MS = 1500;
 // ── loadDB — fetch full DB from backend ───────────────────────────────────────
 async function loadDB() {
   try {
-    await apiLoadDB();         // fills global DB via api.js
+    const token = sessionStorage.getItem('jwt_token');
+    if (!token) {
+      // Not logged in yet — just initialize empty DB and return
+      if (typeof _initDBFields === 'function') Object.assign(DB, _initDBFields(DB));
+      return;
+    }
+    await apiLoadDB();
   } catch (err) {
     console.error('[DAMAM] loadDB failed:', err.message);
-    setTimeout(function() {
-      if (typeof toast === 'function')
-        toast('⚠️ Could not load data from server: ' + err.message, 'error', 6000);
-    }, 800);
   }
-
   if (typeof _initDBFields === 'function') Object.assign(DB, _initDBFields(DB));
   _checkBackupReminder();
+
 }
 
 // ── saveDB — persist in-memory DB to backend (debounced) ─────────────────────
