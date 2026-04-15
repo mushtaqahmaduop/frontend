@@ -1,3 +1,4 @@
+
 /* ─── DAMAM HMS — STORAGE (WEB VERSION) ──────────────────────────────────────
    Replaces src/storage.js.
    All localStorage read/write is replaced with API calls via api.js.
@@ -18,24 +19,28 @@ const SAVE_DEBOUNCE_MS = 1500;
 
 // ── loadDB — fetch full DB from backend ───────────────────────────────────────
 async function loadDB() {
+  // ✅ FIX: Don't load if user is not logged in yet
+  if (!sessionStorage.getItem('jwt_token')) return;
+
   try {
-    const token = sessionStorage.getItem('jwt_token');
-    if (!token) {
-      // Not logged in yet — just initialize empty DB and return
-      if (typeof _initDBFields === 'function') Object.assign(DB, _initDBFields(DB));
-      return;
-    }
-    await apiLoadDB();
+    await apiLoadDB();         // fills global DB via api.js
   } catch (err) {
     console.error('[DAMAM] loadDB failed:', err.message);
+    setTimeout(function() {
+      if (typeof toast === 'function')
+        toast('⚠️ Could not load data from server: ' + err.message, 'error', 6000);
+    }, 800);
   }
+
   if (typeof _initDBFields === 'function') Object.assign(DB, _initDBFields(DB));
   _checkBackupReminder();
-
 }
 
 // ── saveDB — persist in-memory DB to backend (debounced) ─────────────────────
 function saveDB() {
+  // ✅ FIX: Don't save if user is not logged in yet
+  if (!sessionStorage.getItem('jwt_token')) return true;
+
   if (typeof enforceDataRetention === 'function') enforceDataRetention().catch(console.error);
 
   // Debounce: cancel pending save and schedule a new one
