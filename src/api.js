@@ -44,11 +44,16 @@ async function _apiFetch(path, options) {
   }
 
   // Token expired or invalid — force logout
-  if (res.status === 401) {
+ if (res.status === 401) {
     _clearToken();
-    if (typeof toast === 'function') toast('Session expired. Please log in again.', 'error');
-    setTimeout(() => location.reload(), 1500);
+    const wasLoggedIn = sessionStorage.getItem('h_auth') === '1';
+    sessionStorage.removeItem('h_auth');
+    if (wasLoggedIn) {
+        if (typeof toast === 'function') toast('Session expired. Please log in again.', 'error');
+        setTimeout(() => location.reload(), 1500);
+    }
     throw new Error('Unauthorized');
+
   }
 
   const data = await res.json().catch(() => ({}));
