@@ -10,10 +10,10 @@
 
 
 // ── COURSE AUTOCOMPLETE — defined in src/utils.js (do not redeclare here)
-function getTypeById(id) { return DB.settings.roomTypes.find(t=>t.id===id)||DB.settings.roomTypes[0]; }
+function getTypeById(id) { const rt=(DB.settings&&DB.settings.roomTypes)||[]; return rt.find(t=>t.id===id)||rt[0]; }
 function getRoomType(room) { return getTypeById(room.typeId); }
 // getRoomOccupancy includes ALL active students (regular + force-added) — used for physical seat display
-function getRoomOccupancy(room) { return DB.students.filter(t=>t.roomId===room.id && t.status==='Active').length; }
+function getRoomOccupancy(room) { return (DB.students||[]).filter(t=>t.roomId===room.id && t.status==='Active').length; }
 
 // ── SAFE WINDOW HELPER ───────────────────────────────────────────────────────
 // Opens a popup; shows a toast and returns null if blocked.
@@ -365,6 +365,15 @@ function updateSidebar() {
 // DASHBOARD
 // ════════════════════════════════════════════════════════════════════════════
 function renderDashboard() {
+  // ✅ Safety: ensure DB arrays exist (in case server returned empty data)
+  DB.rooms     = DB.rooms     || [];
+  DB.students  = DB.students  || [];
+  DB.payments  = DB.payments  || [];
+  DB.expenses  = DB.expenses  || [];
+  DB.transfers = DB.transfers || [];
+  if (!DB.settings)                  DB.settings = {};
+  DB.settings.roomTypes = DB.settings.roomTypes || [];
+
   // Alert system
   const overduePayments = DB.payments.filter(p=>p.status==='Pending');
   const openMaint = (DB.maintenance||[]).filter(m=>m.status==='Open').length;
