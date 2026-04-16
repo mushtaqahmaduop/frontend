@@ -172,7 +172,7 @@ function buildReceiptHTML(payId) {
       + 'letter-spacing:1.5px;text-align:right;margin-top:2px">** PENDING BALANCE **</div>';
   }
   html += dotRow('Method', escHtml(p.method || 'Cash'));
-  html += dotRow('Status', p.status === 'Paid' ? '✅ PAID' : '⏳ PENDING');
+  html += dotRow('Status', p.status === 'Paid' ? 'PAID' : '⏳ PENDING');
   html += '</div>';
 
   var history   = (p.partialPayments && p.partialPayments.length) ? p.partialPayments : [];
@@ -397,7 +397,7 @@ function sendWA(payId) {
       + 'Reminder from *' + DB.settings.hostelName + '*\n\n'
       + 'Dear Student,\nIf you have already paid the hostel fee, please accept our thanks for your timely payment. '
       + 'We appreciate your cooperation.\nThank you.\n\n'
-      + '✅ Amount Paid: *' + fmtPKR(alreadyPaidRecord ? alreadyPaidRecord.amount : p.amount) + '*\n'
+      + 'Amount Paid: *' + fmtPKR(alreadyPaidRecord ? alreadyPaidRecord.amount : p.amount) + '*\n'
       + 'Month: ' + p.month + '\nRoom #' + (p.roomNumber || '—');
   } else {
     msg = 'Assalamu Alaikum *' + name + '*,\n\n'
