@@ -15,13 +15,12 @@
 
 // ── Save debounce — batches rapid saves into one request every 1.5 seconds ───
 let _saveTimer = null;
-const SAVE_DEBOUNCE_MS = 500;
+const SAVE_DEBOUNCE_MS = 1500;
+let _dbLoaded = false; // ← GUARD: blocks saves until initial load completes
 
 // ── loadDB — fetch full DB from backend ───────────────────────────────────────
 async function loadDB() {
-  // ✅ FIX: Don't load if user is not logged in yet
-  if (!sessionStorage.getItem('jwt_token')) return;
-
+  _dbLoaded = false; // block saves during load
   try {
     await apiLoadDB();         // fills global DB via api.js
   } catch (err) {
@@ -33,13 +32,13 @@ async function loadDB() {
   }
 
   if (typeof _initDBFields === 'function') Object.assign(DB, _initDBFields(DB));
+  _dbLoaded = true; // allow saves only AFTER load completes
   _checkBackupReminder();
 }
 
 // ── saveDB — persist in-memory DB to backend (debounced) ─────────────────────
 function saveDB() {
-  // ✅ FIX: Don't save if user is not logged in yet
-  if (!sessionStorage.getItem('jwt_token')) return true;
+  if (!_dbLoaded) return true; // block saves until DB is fully loaded
 
   if (typeof enforceDataRetention === 'function') enforceDataRetention().catch(console.error);
 
@@ -100,7 +99,6 @@ function markBackupDone() {
 }
 
 // ── Import backup (from JSON file) ────────────────────────────────────────────
-// Replaces the Electron onImportBackup handler
 function restoreFromFile(jsonString) {
   try {
     if (typeof jsonString !== 'string' || jsonString.length > 50 * 1024 * 1024) {
