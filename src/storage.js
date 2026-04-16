@@ -15,7 +15,7 @@
 
 // ── Save debounce — batches rapid saves into one request every 1.5 seconds ───
 let _saveTimer = null;
-const SAVE_DEBOUNCE_MS = 1500;
+const SAVE_DEBOUNCE_MS = 500;
 
 // ── loadDB — fetch full DB from backend ───────────────────────────────────────
 async function loadDB() {
